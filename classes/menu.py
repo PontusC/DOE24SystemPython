@@ -81,14 +81,17 @@ class Menu:
                 pass
         
     def showAlarms(self):
+        self.clearTerminal()
         print("Active alarms")
         self.waitAnyKeypress()
         
     def initMonitoringMode(self):
+        self.clearTerminal()
         print("Monitoring mode")
         self.waitAnyKeypress()
         
     def removeAlarm(self):
+        self.clearTerminal()
         print("remove alarms")
         self.waitAnyKeypress()
         
