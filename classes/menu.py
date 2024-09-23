@@ -65,6 +65,7 @@ class Menu:
             self.waitAnyKeypress()
             return clean_input
         
+        # Takes input and generates correct alarm
         self.clearTerminal()
         self.listChoices(self.ALARMCHOICES)
         clean_input = self.validateInputChoice(len(self.ALARMCHOICES))
@@ -81,14 +82,17 @@ class Menu:
         
     def showAlarms(self):
         print("Active alarms")
+        self.waitAnyKeypress()
         
     def initMonitoringMode(self):
         print("Monitoring mode")
+        self.waitAnyKeypress()
         
     def removeAlarm(self):
         print("remove alarms")
+        self.waitAnyKeypress()
         
-    # Given dict lists choices vs actions
+    # Given dict lists choices and actions
     def listChoices(self, dict: dict):
         print("Choices\t\tActions")
         self.printPrettyStates(dict)
