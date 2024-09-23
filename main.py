@@ -21,10 +21,10 @@ def print_data():
         print_data.first_loop = False
         
     cpu:        float = psutil.cpu_percent(interval=None, percpu=False)
-    vmem:       float = psutil.virtual_memory().percent
+    mem:       float = psutil.virtual_memory().percent
     disk:       float = psutil.disk_usage("C:\\").percent
 
-    print(f"CPU%:\t {cpu}\nMEM%:\t {vmem}\nDSK%:\t {disk}")
+    print(f"CPU%:\t{cpu}\nMEM%:\t{mem}\nDSK%:\t{disk}")
         
 # Run to clear one line above in terminal
 def clear_above_line():
