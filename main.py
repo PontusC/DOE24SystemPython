@@ -1,8 +1,6 @@
 import psutil, time, os
 from classes.menu import Menu
 
-TESTING: bool = True
-
 def run():
     print_data()
     try: 
@@ -39,10 +37,6 @@ def clear_above_line():
 if __name__ == '__main__':
     print("Starting...")
     os.system("cls")
-    if not TESTING:
-        run()
-    else: #Codeblock for testing code
-        menu = Menu()
-        menu.startMenu()
-        pass
+    menu = Menu()
+    menu.runMenu()
     print("Terminating...")
