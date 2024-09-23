@@ -24,7 +24,7 @@ def print_data():
         print_data.first_loop = False
         
     cpu:        float = psutil.cpu_percent(interval=None, percpu=False)
-    mem:       float = psutil.virtual_memory().percent
+    mem:        float = psutil.virtual_memory().percent
     disk:       float = psutil.disk_usage("C:\\").percent
 
     print(f"CPU%:\t{cpu}\nMEM%:\t{mem}\nDSK%:\t{disk}")
@@ -43,6 +43,6 @@ if __name__ == '__main__':
         run()
     else: #Codeblock for testing code
         menu = Menu()
-        menu.testprint()
+        menu.startMenu()
         pass
     print("Terminating...")
