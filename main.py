@@ -39,4 +39,4 @@ if __name__ == '__main__':
     os.system("cls")
     menu = Menu()
     menu.runMenu()
-    print("Terminating...")
+    print("Terminating . . .")
