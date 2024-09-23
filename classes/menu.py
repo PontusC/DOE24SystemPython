@@ -1,4 +1,8 @@
-import os, getch as m
+import os
+try:
+    import msvcrt as m
+except ImportError:
+    import getch as m
 
 
 class Menu:
