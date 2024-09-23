@@ -1,4 +1,4 @@
-import os, msvcrt as m
+import os, getch as m
 
 
 class Menu:
@@ -142,4 +142,4 @@ class Menu:
         
     @staticmethod
     def clearTerminal():
-        os.system("cls")
+        os.system('cls' if os.name == 'nt' else 'clear')
