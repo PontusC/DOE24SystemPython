@@ -36,7 +36,7 @@ def clear_above_line():
 
 if __name__ == '__main__':
     print("Starting...")
-    os.system("cls")
     menu = Menu()
+    menu.clearTerminal()
     menu.runMenu()
     print("Terminating . . .")
