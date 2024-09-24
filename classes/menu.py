@@ -1,4 +1,4 @@
-import os
+import os, time
 from classes.monitor import Monitor
 # Import msvcrt on windows, getch on linux
 try:
@@ -72,18 +72,39 @@ class Menu:
         self.clearTerminal()
         try:
             self.monitor.initMonitoring()
-            print("Monitoring started . . .")
+            print("Monitoring initialized . . .")
         except Exception:
-            print("Monitoring already started . . .")
+            print("Monitoring already initialized . . .")
         self.waitAnyKeypress()
         
     def showMonitoringValues(self):
+        # checks for input and breaks
+        def waitForInput() -> bool:
+            # Cleans input so nothing remains in input buffer
+            def flush_input():
+                try:
+                    m.getch()
+                except: # Shouldnt happen but if it does this solves
+                    import sys, termios    #for linux/unix
+                    termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+                    
+            for x in range(10):
+                    time.sleep(0.1)
+                    if m.kbhit():
+                        flush_input() # Removes stored keystroke from kbhit
+                        return True
+                
         self.clearTerminal()
         try:
-            self.monitor.printMonitorValues()
-        except Exception:
-            print("Monitoring not started . . .")
-        self.waitAnyKeypress()
+            while True:
+                print(self.monitor.printMonitorValues())
+                print("Press any key to continue . . .")
+                if waitForInput(): # Returns true if a button was pressed
+                    break
+                self.clearTerminal()
+        except Exception: # Monitor throws exception if monitoring not initialized
+            print("Monitoring not initialized . . .")
+            self.waitAnyKeypress()
         
     def createAlarm(self):
         # Takes STR input to determine what type of alarm to generate

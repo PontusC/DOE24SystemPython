@@ -1,4 +1,9 @@
 import psutil
+# Import msvcrt on windows, getch on linux
+try:
+    import msvcrt as m
+except ImportError:
+    import getch as m # type: ignore
 from psutil._common import bytes2human
 
 class Monitor:
@@ -39,22 +44,19 @@ class Monitor:
             self.monitoringStarted = True
      
     # Returns formatted string containing all monitoring values       
-    def printMonitorValues(self):
-        def printSeparation():
-            print("--------------------------------------------------------------------------")
+    def printMonitorValues(self) -> str:
+        separationStr = "\n--------------------------------------------------------------------------"
         if not self.monitoringStarted:
             raise Exception("Monitoring not started")
         else:
             self.updateValues()
             #CPU
-            print(f"CPU\t-\t{self.cpuPercent}%\t-\tCores({len(self.cpuPercentMultiple)}) \t-\t{self.cpuPercentMultiple}")
-            printSeparation()
+            cpuStr = f"CPU\t-\t{self.cpuPercent}%\t-\tCores({len(self.cpuPercentMultiple)}) \t-\t{self.cpuPercentMultiple}{separationStr}"
             #MEM
-            print(f"MEM\t-\t{self.memPercent}%\t-\tTotal: {bytes2human(self.memTotal)+"B"}\t-\tUsed: {bytes2human(self.memUsed)+"B"}")
+            memStr = f"\nMEM\t-\t{self.memPercent}%\t-\tTotal: {bytes2human(self.memTotal)+"B"}\t-\tUsed: {bytes2human(self.memUsed)+"B"}{separationStr}"
             #DSK
-            printSeparation()
-            print(f"DSK\t-\t{self.dskPercent}%\t-\tTotal: {bytes2human(self.dskTotal)+"B"}\t-\tUsed: {bytes2human(self.dskUsed)+"B"}")
-            printSeparation()
+            dskStr = f"\nDSK\t-\t{self.dskPercent}%\t-\tTotal: {bytes2human(self.dskTotal)+"B"}\t-\tUsed: {bytes2human(self.dskUsed)+"B"}{separationStr}"
+            return "".join([cpuStr, memStr, dskStr])
         
     # Updates monitoring values
     def updateValues(self):
