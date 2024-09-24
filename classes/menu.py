@@ -80,7 +80,7 @@ class Menu:
     def showMonitoringValues(self):
         self.clearTerminal()
         try:
-            self.monitor.returnMonitoringValues()
+            self.monitor.printMonitorValues()
         except Exception:
             print("Monitoring not started . . .")
         self.waitAnyKeypress()
