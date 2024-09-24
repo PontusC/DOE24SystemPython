@@ -1,5 +1,6 @@
 import psutil, time, os
 from classes.menu import Menu
+from classes.monitor import Monitor
 
 def run():
     print_data()
@@ -36,7 +37,9 @@ def clear_above_line():
 
 if __name__ == '__main__':
     print("Starting...")
+    # Instantiating singletons
     menu = Menu()
     menu.clearTerminal()
+    # Starting menu
     menu.runMenu()
     print("Terminating . . .")

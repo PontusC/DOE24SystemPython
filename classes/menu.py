@@ -1,28 +1,45 @@
 import os
+from classes.monitor import Monitor
+# Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
 except ImportError:
     import getch as m # type: ignore
 
-
+# Handles all menu interactions in terminal and forwarding commands to correct handler
 class Menu:
+    
+    # Singleton pattern
+    _self_ = None
+    def __new__(menu):
+        if menu._self_ is None:
+            menu._self_ = super().__new__(menu)
+        return menu._self_
+    
+    # Class variables/constants
+    # Both below dicts should just be rewritten to be a list/array
+    # All different menu commands excluding default menu
+    MENUCHOICES = dict([(1, "Initiate monitoring"),
+                        (2, "Show monitoring values"),
+                        (3, "Create alarm"),
+                        (4, "Remove alarm"),
+                        (5, "Show alarms"),
+                        (6, "Initiate monitoring mode"),
+                        (7, "Exit")])
+    # All different commands for alarm menues
+    ALARMCHOICES = dict([(1, "CPU"),
+                         (2, "MEM"),
+                         (3, "DSK"),
+                         (4, "Return")])
+    
+    # Used to remember if its the first time user has entered wrong input in validateInputChoice
+    firstError = True
+    
+    # Reference to monitor
+    monitor = Monitor()
+    
     def __init__(self) -> None:
-        # Both below dicts should just be rewritten to be a list/array
-        # All different menu commands excluding default menu
-        self.MENUCHOICES = dict([(1, "Initiate monitoring"),
-                            (2, "Show monitoring values"),
-                            (3, "Create alarm"),
-                            (4, "Remove alarm"),
-                            (5, "Show alarms"),
-                            (6, "Initiate monitoring mode"),
-                            (7, "Exit")])
-        # All different commands for alarm menues
-        self.ALARMCHOICES = dict([(1, "CPU"),
-                                (2, "MEM"),
-                                (3, "DSK"),
-                                (4, "Return")])
-        # Used to remember if its the first time user has entered wrong input in validateInputChoice
-        self.firstError = True
+        pass
         
     def runMenu(self): # Initial program state, taking inputs and performing actions 
         # Main menu/program loop
@@ -49,14 +66,23 @@ class Menu:
         except KeyboardInterrupt: # Control+C to exit
             pass
         
+        
+    # Starts monitor
     def initMonitoring(self):
         self.clearTerminal()
-        print("Monitoring started . . .")
+        try:
+            self.monitor.initMonitoring()
+            print("Monitoring started . . .")
+        except Exception:
+            print("Monitoring already started . . .")
         self.waitAnyKeypress()
         
     def showMonitoringValues(self):
         self.clearTerminal()
-        print("Active monitoring below")
+        try:
+            self.monitor.returnMonitoringValues()
+        except Exception:
+            print("Monitoring not started . . .")
         self.waitAnyKeypress()
         
     def createAlarm(self):
