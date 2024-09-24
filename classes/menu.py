@@ -1,4 +1,5 @@
 import os, time
+from pynput import keyboard
 from classes.monitor import Monitor
 # Import msvcrt on windows, getch on linux
 try:
@@ -90,14 +91,20 @@ class Menu:
                     
             for x in range(10):
                     time.sleep(0.1)
-                    if m.kbhit():
-                        flush_input() # Removes stored keystroke from kbhit
-                        return True
+                    try: # Windows key detection
+                        if m.kbhit():
+                            flush_input() # Removes stored keystroke from kbhit
+                            return True
+                    except: # WSL key detection
+                        pass
                 
         self.clearTerminal()
         try:
             while True:
-                print(self.monitor.printMonitorValues())
+                print(self.monitor.returnMonitorValues())
+                if not os.name == "nt":
+                    self.waitAnyKeypress()
+                    break
                 print("Press any key to continue . . .")
                 if waitForInput(): # Returns true if a button was pressed
                     break
@@ -190,7 +197,8 @@ class Menu:
         LINE_UP = '\033[1A'     # ANSI-code that moves cursor up one line
         LINE_CLEAR = '\x1b[2K'  # ANSI-code that erases current line
         print(LINE_UP, end=LINE_CLEAR)
-        
+    
+    # cls for windows, clear if linux
     @staticmethod
     def clearTerminal():
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system("cls" if os.name == "nt" else "clear")

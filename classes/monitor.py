@@ -22,16 +22,17 @@ class Monitor:
     cpuPercent : float = None
     cpuPercentMultiple : tuple = None
     # MEM stats
-    memPercent = None
-    memTotal = None
-    memUsed = None
+    memPercent : float = None
+    memTotal : int = None
+    memUsed : int = None
     # DSK stats
-    dskPercent = None
-    dskTotal = None
-    dskUsed = None
+    dskPercent : float = None
+    dskTotal : int = None
+    dskUsed : int = None
     
     # constants
     DSKPATHWINDOWS = "C:\\" # windows
+    DSKPATHWSL = "/mnt/c/" # WSL
     
     def __init__(self) -> None:
         pass
@@ -44,8 +45,9 @@ class Monitor:
             self.monitoringStarted = True
      
     # Returns formatted string containing all monitoring values       
-    def printMonitorValues(self) -> str:
+    def returnMonitorValues(self) -> str:
         separationStr = "\n--------------------------------------------------------------------------"
+        strByteSuffix = 'B' # Appended to say GB instead of just G
         if not self.monitoringStarted:
             raise Exception("Monitoring not started")
         else:
@@ -53,9 +55,9 @@ class Monitor:
             #CPU
             cpuStr = f"CPU\t-\t{self.cpuPercent}%\t-\tCores({len(self.cpuPercentMultiple)}) \t-\t{self.cpuPercentMultiple}{separationStr}"
             #MEM
-            memStr = f"\nMEM\t-\t{self.memPercent}%\t-\tTotal: {bytes2human(self.memTotal)+"B"}\t-\tUsed: {bytes2human(self.memUsed)+"B"}{separationStr}"
+            memStr = f"\nMEM\t-\t{self.memPercent}%\t-\tTotal: {bytes2human(self.memTotal)+strByteSuffix}\t-\tUsed: {bytes2human(self.memUsed)+strByteSuffix}{separationStr}"
             #DSK
-            dskStr = f"\nDSK\t-\t{self.dskPercent}%\t-\tTotal: {bytes2human(self.dskTotal)+"B"}\t-\tUsed: {bytes2human(self.dskUsed)+"B"}{separationStr}"
+            dskStr = f"\nDSK\t-\t{self.dskPercent}%\t-\tTotal: {bytes2human(self.dskTotal)+strByteSuffix}\t-\tUsed: {bytes2human(self.dskUsed)+strByteSuffix}{separationStr}"
             return "".join([cpuStr, memStr, dskStr])
         
     # Updates monitoring values
@@ -72,8 +74,10 @@ class Monitor:
             self.dskPercent = psutil.disk_usage(self.DSKPATHWINDOWS).percent
             self.dskTotal = psutil.disk_usage(self.DSKPATHWINDOWS).total
             self.dskUsed = self.dskTotal - psutil.disk_usage(self.DSKPATHWINDOWS).free
-        except OSError:
-            print("DSKPATH error")
+        except OSError: # Throws error if running on WSL
+            self.dskPercent = psutil.disk_usage(self.DSKPATHWSL).percent
+            self.dskTotal = psutil.disk_usage(self.DSKPATHWSL).total
+            self.dskUsed = self.dskTotal - psutil.disk_usage(self.DSKPATHWSL).free
 
     def returnCPUStr(self) -> str:
         pass
