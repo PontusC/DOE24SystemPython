@@ -2,7 +2,7 @@ import os
 try:
     import msvcrt as m
 except ImportError:
-    import getch as m
+    import getch as m # type: ignore
 
 
 class Menu:
