@@ -1,5 +1,4 @@
 import os, time
-from pynput import keyboard
 from classes.monitor import Monitor
 # Import msvcrt on windows, getch on linux
 try:
