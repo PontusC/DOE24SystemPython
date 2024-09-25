@@ -1,4 +1,5 @@
 import psutil
+from classes.alarmMonitor import AlarmMonitor, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
@@ -17,6 +18,7 @@ class ResourceMonitor:
     
     # Class variables
     monitoringStarted = False
+    alarmMonitor = AlarmMonitor()
     
     # CPU stats
     cpuPercent : float = None
@@ -78,6 +80,12 @@ class ResourceMonitor:
             self.dskPercent = psutil.disk_usage(self.DSKPATHWSL).percent
             self.dskTotal = psutil.disk_usage(self.DSKPATHWSL).total
             self.dskUsed = self.dskTotal - psutil.disk_usage(self.DSKPATHWSL).free
+            
+    # Prints if an alarm is hit
+    def monitoringMode(self):
+        cpuAlarm = self.alarmMonitor.getLowestCPUAlarm()
+        memAlarm = self.alarmMonitor.getLowestMEMAlarm()
+        dskAlarm = self.alarmMonitor.getLowestDSKAlarm()
 
     def returnCPUStr(self) -> str:
         pass
