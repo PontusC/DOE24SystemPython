@@ -37,7 +37,7 @@ class AlarmMonitor:
         self.alarmDSK = []
         
     # Creates alarm of given type and threshold
-    def setAlarm(self, type : AlarmType, threshold : int):
+    def createAlarm(self, type : AlarmType, threshold : int):
         newAlarm = self.Alarm(threshold, type)
         match type:
             case 1: # Matches ENUM to it's value, CPU = 1 etc...
@@ -46,6 +46,10 @@ class AlarmMonitor:
                 bisect.insort(self.alarmMEM, newAlarm)
             case 3:
                 bisect.insort(self.alarmDSK, newAlarm)
+    
+    # Returns a formatted str of all current alarms, listed in rising order and by type
+    def returnAlarms(self) -> str:
+        pass
     
     # Attempts to remove given alarm, true if successful
     def removeAlarm(self) -> bool:

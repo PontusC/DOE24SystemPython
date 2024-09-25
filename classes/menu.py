@@ -1,6 +1,6 @@
 import os, time
 from classes.resourceMonitor import ResourceMonitor
-from classes.alarmMonitor import AlarmMonitor
+from classes.alarmMonitor import AlarmMonitor, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
@@ -36,7 +36,7 @@ class Menu:
     # Used to remember if its the first time user has entered wrong input in validateInputChoice
     firstError = True
     
-    # Reference to monitor and AlarmMonitor
+    # Reference to ResourceMonitor and AlarmMonitor
     monitor = ResourceMonitor()
     alarmMonitor = AlarmMonitor()
     
@@ -69,7 +69,7 @@ class Menu:
             pass
         
         
-    # Starts monitor
+    # Starts monitoring
     def initMonitoring(self):
         self.clearTerminal()
         try:
@@ -80,6 +80,7 @@ class Menu:
         self.waitAnyKeypress()
         
     def showMonitoringValues(self):
+        
         # checks for input and breaks
         def waitForInput() -> bool:
             # Cleans input so nothing remains in input buffer
@@ -115,34 +116,23 @@ class Menu:
             self.waitAnyKeypress()
         
     def createAlarm(self):
-        # Takes STR input to determine what type of alarm to generate
-        # Returns the validated input to be used
-        def setAlarmValue(self, alarmType: str) -> int:
-            print(f"Enter an alarm value for {alarmType} between 1-100%")
-            clean_input = self.validateInputChoice(100)
-            
-            print(f"Alarm created for {alarmType} at {clean_input}% usage")
-            self.waitAnyKeypress()
-            return clean_input
-        
         # Takes input and generates correct alarm
         self.clearTerminal()
         self.listChoices(self.ALARMCHOICES)
-        clean_input = self.validateInputChoice(len(self.ALARMCHOICES))
+        # Takes input and generates the correct ENUM associated with that AlarmType
+        alarmType = AlarmType(self.validateInputChoice(len(self.ALARMCHOICES)))
+        # Takes user input in range 1-100 and creates and stores that alarm
         self.clearTerminal()
-        match clean_input:
-            case 1: #CPU
-                alarmValue : int = setAlarmValue(self,"CPU")
-            case 2: #MEM
-                alarmValue : int = setAlarmValue(self,"MEM")
-            case 3: #DSK
-                alarmValue : int = setAlarmValue(self,"DSK")
-            case 4:
-                pass
+        print(f"Enter an alarm value for {alarmType.name} between 1-100%")
+        alarmThreshold = self.validateInputChoice(100)
+        self.clearTerminal()
+        self.alarmMonitor.createAlarm(alarmType, alarmThreshold)
+        print(f"Alarm created for {alarmType.name} at {alarmThreshold}% usage")
+        self.waitAnyKeypress()
         
     def showAlarms(self):
         self.clearTerminal()
-        print("Active alarms")
+        print(self.alarmMonitor.returnAlarms())
         self.waitAnyKeypress()
         
     def initMonitoringMode(self):
