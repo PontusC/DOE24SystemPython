@@ -86,13 +86,22 @@ class ResourceMonitor:
             
     # Prints if an alarm is hit
     def monitoringMode(self):
-        pass
+        self.updateValues()
+        # Check CPU
+        if not self.cpuAlarm == None and self.cpuPercent >= float(self.cpuAlarm.alarmThreshold):
+            print("cpu")
+        # Check MEM
+        if not self.memAlarm == None and self.memPercent >= float(self.memAlarm.alarmThreshold):
+            print("mem")
+        # Check DSK
+        if not self.dskAlarm == None and self.dskPercent >= float(self.dskAlarm.alarmThreshold):
+            print("dsk")
        
     # Ran once before entering monitoringMode to set the alarmvalues
     def setAlarms(self):
-        cpuAlarm = self.alarmMonitor.getLowestCPUAlarm()
-        memAlarm = self.alarmMonitor.getLowestMEMAlarm()
-        dskAlarm = self.alarmMonitor.getLowestDSKAlarm()
+        self.cpuAlarm = self.alarmMonitor.getLowestCPUAlarm()
+        self.memAlarm = self.alarmMonitor.getLowestMEMAlarm()
+        self.dskAlarm = self.alarmMonitor.getLowestDSKAlarm()
 
     def returnCPUStr(self) -> str:
         pass

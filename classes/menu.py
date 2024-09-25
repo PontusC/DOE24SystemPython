@@ -40,6 +40,9 @@ class Menu:
     resourceMonitor = ResourceMonitor()
     alarmMonitor = AlarmMonitor()
     
+    # Constants for reused strings
+    NOTINITIALIZED = "Monitoring not intialized . . ."
+    
     def __init__(self) -> None:
         pass
         
@@ -79,9 +82,9 @@ class Menu:
             print("Monitoring already initialized . . .")
         self.waitAnyKeypress()
         
+    # Contiually shows current resource usage (on windows)
     def showMonitoringValues(self):
-        
-        # checks for input and breaks
+        # checks for input and breaks a loop
         def waitForInput() -> bool:
             # Cleans input so nothing remains in input buffer
             def flush_input():
@@ -107,12 +110,13 @@ class Menu:
                 if not os.name == "nt":
                     self.waitAnyKeypress()
                     break
+                # It is reachable, needed for wsl/linux
                 print("Press any key to continue . . .")
                 if waitForInput(): # Returns true if a button was pressed
                     break
                 self.clearTerminal()
         except Exception: # Monitor throws exception if monitoring not initialized
-            print("Monitoring not initialized . . .")
+            print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
         
     def createAlarm(self):
@@ -133,18 +137,24 @@ class Menu:
             self.waitAnyKeypress()
         else:
             self.clearTerminal()
-        
+    
+    # Prints all active alarms
     def showAlarms(self):
         self.clearTerminal()
         print(self.alarmMonitor.returnAlarms())
         self.waitAnyKeypress()
-        
+    
+    # Continually (on windows) prints that it is monitoring and whenever an alarm occurs
     def initMonitoringMode(self):
         self.clearTerminal()
-        # Set alarm values before entering
-        self.resourceMonitor.setAlarms()
-        # Loop here and check for changes and reprint, exit on input
-        print("Monitoring mode")
+        if  not self.resourceMonitor.monitoringStarted:
+            print(self.NOTINITIALIZED)
+        else:
+            # Set alarm values before entering
+            self.resourceMonitor.setAlarms()
+            # Loop here and check for changes and reprint, exit on input
+            self.resourceMonitor.monitoringMode()
+            print("Monitoring mode")
         self.waitAnyKeypress()
         
     def removeAlarm(self):
