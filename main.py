@@ -1,6 +1,6 @@
 import psutil, time, os
 from classes.menu import Menu
-from classes.monitor import Monitor
+from classes.resourceMonitor import ResourceMonitor
 
 if __name__ == '__main__':
     print("Starting...")

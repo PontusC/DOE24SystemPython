@@ -6,7 +6,7 @@ except ImportError:
     import getch as m # type: ignore
 from psutil._common import bytes2human
 
-class Monitor:
+class ResourceMonitor:
     
     # Singleton pattern
     _self_ = None

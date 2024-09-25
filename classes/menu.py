@@ -1,5 +1,6 @@
 import os, time
-from classes.monitor import Monitor
+from classes.resourceMonitor import ResourceMonitor
+from classes.alarmMonitor import AlarmMonitor
 # Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
@@ -35,8 +36,9 @@ class Menu:
     # Used to remember if its the first time user has entered wrong input in validateInputChoice
     firstError = True
     
-    # Reference to monitor
-    monitor = Monitor()
+    # Reference to monitor and AlarmMonitor
+    monitor = ResourceMonitor()
+    alarmMonitor = AlarmMonitor()
     
     def __init__(self) -> None:
         pass
@@ -118,6 +120,7 @@ class Menu:
         def setAlarmValue(self, alarmType: str) -> int:
             print(f"Enter an alarm value for {alarmType} between 1-100%")
             clean_input = self.validateInputChoice(100)
+            
             print(f"Alarm created for {alarmType} at {clean_input}% usage")
             self.waitAnyKeypress()
             return clean_input
