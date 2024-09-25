@@ -37,7 +37,7 @@ class Menu:
     firstError = True
     
     # Reference to ResourceMonitor and AlarmMonitor
-    monitor = ResourceMonitor()
+    resourceMonitor = ResourceMonitor()
     alarmMonitor = AlarmMonitor()
     
     def __init__(self) -> None:
@@ -73,7 +73,7 @@ class Menu:
     def initMonitoring(self):
         self.clearTerminal()
         try:
-            self.monitor.initMonitoring()
+            self.resourceMonitor.initMonitoring()
             print("Monitoring initialized . . .")
         except Exception:
             print("Monitoring already initialized . . .")
@@ -103,7 +103,7 @@ class Menu:
         self.clearTerminal()
         try:
             while True:
-                print(self.monitor.returnMonitorValues())
+                print(self.resourceMonitor.returnMonitorValues())
                 if not os.name == "nt":
                     self.waitAnyKeypress()
                     break
@@ -141,6 +141,9 @@ class Menu:
         
     def initMonitoringMode(self):
         self.clearTerminal()
+        # Set alarm values before entering
+        self.resourceMonitor.setAlarms()
+        # Loop here and check for changes and reprint, exit on input
         print("Monitoring mode")
         self.waitAnyKeypress()
         

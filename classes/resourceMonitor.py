@@ -19,6 +19,9 @@ class ResourceMonitor:
     # Class variables
     monitoringStarted = False
     alarmMonitor = AlarmMonitor()
+    cpuAlarm = None
+    memAlarm = None
+    dskAlarm = None
     
     # CPU stats
     cpuPercent : float = None
@@ -83,6 +86,10 @@ class ResourceMonitor:
             
     # Prints if an alarm is hit
     def monitoringMode(self):
+        pass
+       
+    # Ran once before entering monitoringMode to set the alarmvalues
+    def setAlarms(self):
         cpuAlarm = self.alarmMonitor.getLowestCPUAlarm()
         memAlarm = self.alarmMonitor.getLowestMEMAlarm()
         dskAlarm = self.alarmMonitor.getLowestDSKAlarm()
