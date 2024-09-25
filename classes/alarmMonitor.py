@@ -21,6 +21,9 @@ class AlarmMonitor:
         # Returns true if self object has lower threshold of alarm
         def __lt__(self, other) -> bool:
             return self.alarmThreshold <= other.alarmThreshold
+        
+        def __str__(self) -> str:
+            return f"{self.alarmType.name}-alarm at {self.alarmThreshold}%"
     
     # Singleton pattern
     _self_ = None
@@ -39,7 +42,7 @@ class AlarmMonitor:
     # Creates alarm of given type and threshold
     def createAlarm(self, type : AlarmType, threshold : int):
         newAlarm = self.Alarm(threshold, type)
-        match type:
+        match type.value:
             case 1: # Matches ENUM to it's value, CPU = 1 etc...
                 bisect.insort(self.alarmCPU, newAlarm)
             case 2:
@@ -49,7 +52,8 @@ class AlarmMonitor:
     
     # Returns a formatted str of all current alarms, listed in rising order and by type
     def returnAlarms(self) -> str:
-        pass
+        allAlarms = [*self.alarmCPU, *self.alarmMEM, *self.alarmDSK] # Join all alarms into one array
+        return "".join(str(alarm)+"\n" for alarm in allAlarms)
     
     # Attempts to remove given alarm, true if successful
     def removeAlarm(self) -> bool:

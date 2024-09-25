@@ -120,15 +120,19 @@ class Menu:
         self.clearTerminal()
         self.listChoices(self.ALARMCHOICES)
         # Takes input and generates the correct ENUM associated with that AlarmType
-        alarmType = AlarmType(self.validateInputChoice(len(self.ALARMCHOICES)))
-        # Takes user input in range 1-100 and creates and stores that alarm
-        self.clearTerminal()
-        print(f"Enter an alarm value for {alarmType.name} between 1-100%")
-        alarmThreshold = self.validateInputChoice(100)
-        self.clearTerminal()
-        self.alarmMonitor.createAlarm(alarmType, alarmThreshold)
-        print(f"Alarm created for {alarmType.name} at {alarmThreshold}% usage")
-        self.waitAnyKeypress()
+        validatedInput = self.validateInputChoice(len(self.ALARMCHOICES))
+        if validatedInput < 4: # Only 1-3 valid to generate alarms, 4 back to main menu
+            alarmType = AlarmType(validatedInput)
+            # Takes user input in range 1-100 and creates and stores that alarm
+            self.clearTerminal()
+            print(f"Enter an alarm value for {alarmType.name} between 1-100%")
+            alarmThreshold = self.validateInputChoice(100)
+            self.clearTerminal()
+            self.alarmMonitor.createAlarm(alarmType, alarmThreshold)
+            print(f"Alarm created for {alarmType.name} at {alarmThreshold}% usage")
+            self.waitAnyKeypress()
+        else:
+            self.clearTerminal()
         
     def showAlarms(self):
         self.clearTerminal()
@@ -148,7 +152,7 @@ class Menu:
     # Given dict lists choices and actions
     def listChoices(self, dict: dict):
         print("Choices\t\tActions")
-        self.printPrettyStates(dict)
+        self.pprintDict(dict)
         
     # Verifies and validates input, only allowed to be integers in range
     # Takes an endRange parameter, add +1 if using dict length.
@@ -176,12 +180,12 @@ class Menu:
         m.getch()
         
     # Prints the dict prettily with choices/actions
-    def printPrettyStates(self, dict: dict, count=1):
+    def pprintDict(self, dict: dict, count=1):
         if count > len(dict):
             return
         action : str = dict[count]
         print(f"   {count}\t->\t{action}")
-        self.printPrettyStates(dict, count + 1)
+        self.pprintDict(dict, count + 1)
         
     # Run to clear one line above in terminal
     @staticmethod
