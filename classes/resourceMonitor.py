@@ -89,7 +89,7 @@ class ResourceMonitor:
         self.updateValues()
         # Check CPU
         if not self.cpuAlarm == None and self.cpuPercent >= float(self.cpuAlarm.alarmThreshold):
-            print("cpu")
+            print(f"CPU-Alarm\tThreshold: {self.cpuAlarm.alarmThreshold}%\tCurrent %: {self.cpuPercent}")
         # Check MEM
         if not self.memAlarm == None and self.memPercent >= float(self.memAlarm.alarmThreshold):
             print("mem")

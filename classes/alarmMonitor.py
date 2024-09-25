@@ -53,6 +53,9 @@ class AlarmMonitor:
     # Returns a formatted str of all current alarms, listed in rising order and by type
     def returnAlarms(self) -> str:
         allAlarms = [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms] # Join all alarms into one array
+        # Return None if empty alarms
+        if len(allAlarms) == 0:
+            return ""
         return "".join(str(alarm)+"\n" for alarm in allAlarms).rstrip()
     
     # Below functions return the lowest threshold active alarms, return None if doesnt exist

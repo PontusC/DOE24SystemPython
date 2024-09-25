@@ -141,7 +141,11 @@ class Menu:
     # Prints all active alarms
     def showAlarms(self):
         self.clearTerminal()
-        print(self.alarmMonitor.returnAlarms())
+        alarmStr = self.alarmMonitor.returnAlarms()
+        if alarmStr is None:
+            print("No active alarms . . .")
+        else:
+            print(alarmStr)
         self.waitAnyKeypress()
     
     # Continually (on windows) prints that it is monitoring and whenever an alarm occurs
