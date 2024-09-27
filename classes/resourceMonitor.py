@@ -1,4 +1,5 @@
 import psutil
+from datetime import datetime
 from classes.alarmMonitor import AlarmMonitor, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
@@ -67,6 +68,7 @@ class ResourceMonitor:
         
     # Updates monitoring values
     def updateValues(self):
+        # This function should be the one to raise exception if not initialized
         #CPU
         self.cpuPercent = psutil.cpu_percent(interval=0.1, percpu=False)
         self.cpuPercentMultiple = psutil.cpu_percent(interval=0.1, percpu=True)
@@ -84,24 +86,28 @@ class ResourceMonitor:
             self.dskTotal = psutil.disk_usage(self.DSKPATHWSL).total
             self.dskUsed = self.dskTotal - psutil.disk_usage(self.DSKPATHWSL).free
             
-    # Prints if an alarm is hit
-    def monitoringMode(self):
+    # Prints any alarms triggered and time
+    def checkForAlarms(self):
         self.updateValues()
+        currentTime = datetime.now()
         # Check CPU
         if not self.cpuAlarm == None and self.cpuPercent >= float(self.cpuAlarm.alarmThreshold):
-            print(f"CPU-Alarm\tThreshold: {self.cpuAlarm.alarmThreshold}%\tCurrent %: {self.cpuPercent}")
+            print(f"***** CPU-Alarm\tThreshold: {self.cpuAlarm.alarmThreshold}%\tCurrent %: {self.cpuPercent}\tTime: {currentTime} *****")
         # Check MEM
         if not self.memAlarm == None and self.memPercent >= float(self.memAlarm.alarmThreshold):
-            print("mem")
+            print(f"***** MEM-Alarm\tThreshold: {self.memAlarm.alarmThreshold}%\tCurrent %: {self.memPercent}\tTime: {currentTime} *****")
         # Check DSK
         if not self.dskAlarm == None and self.dskPercent >= float(self.dskAlarm.alarmThreshold):
-            print("dsk")
+            print(f"***** DSK-Alarm\tThreshold: {self.dskAlarm.alarmThreshold}%\tCurrent %: {self.dskPercent}\tTime: {currentTime} *****")
        
-    # Ran once before entering monitoringMode to set the alarmvalues
+    # Ran once before entering monitoring mode and checking for alarms to set the alarmvalues
+    # Raises exception if no alarms created yet
     def setAlarms(self):
         self.cpuAlarm = self.alarmMonitor.getLowestCPUAlarm()
         self.memAlarm = self.alarmMonitor.getLowestMEMAlarm()
         self.dskAlarm = self.alarmMonitor.getLowestDSKAlarm()
+        if self.cpuAlarm is None and self.memAlarm is None and self.dskAlarm is None:
+            raise Exception("No alarms created")
 
     def returnCPUStr(self) -> str:
         pass

@@ -32,6 +32,8 @@ class Menu:
                          (2, "MEM"),
                          (3, "DSK"),
                          (4, "Return")])
+    # Defines how often to check for alarms in seconds
+    alarmIntervalCheck = 5
     
     # Used to remember if its the first time user has entered wrong input in validateInputChoice
     firstError = True
@@ -42,6 +44,7 @@ class Menu:
     
     # Constants for reused strings
     NOTINITIALIZED = "Monitoring not intialized . . ."
+    ANYKEYCONTINUE = "Press any key to continue . . ."
     
     def __init__(self) -> None:
         pass
@@ -84,25 +87,6 @@ class Menu:
         
     # Contiually shows current resource usage (on windows)
     def showMonitoringValues(self):
-        # checks for input and breaks a loop
-        def waitForInput() -> bool:
-            # Cleans input so nothing remains in input buffer
-            def flush_input():
-                try:
-                    m.getch()
-                except: # Shouldnt happen but if it does this solves
-                    import sys, termios    #for linux/unix
-                    termios.tcflush(sys.stdin, termios.TCIOFLUSH)
-                    
-            for x in range(10):
-                    time.sleep(0.1)
-                    try: # Windows key detection
-                        if m.kbhit():
-                            flush_input() # Removes stored keystroke from kbhit
-                            return True
-                    except: # WSL key detection
-                        pass
-                
         self.clearTerminal()
         try:
             while True:
@@ -110,17 +94,17 @@ class Menu:
                 if not os.name == "nt":
                     self.waitAnyKeypress()
                     break
-                # It is reachable, needed for wsl/linux
+                    # It is reachable, needed for wsl/linux
                 print("Press any key to continue . . .")
-                if waitForInput(): # Returns true if a button was pressed
+                if self.waitForInput(): # Returns true if a button was pressed
                     break
                 self.clearTerminal()
         except Exception: # Monitor throws exception if monitoring not initialized
             print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
         
+    # Takes input and generates alarm of specified type
     def createAlarm(self):
-        # Takes input and generates correct alarm
         self.clearTerminal()
         self.listChoices(self.ALARMCHOICES)
         # Takes input and generates the correct ENUM associated with that AlarmType
@@ -151,15 +135,29 @@ class Menu:
     # Continually (on windows) prints that it is monitoring and whenever an alarm occurs
     def initMonitoringMode(self):
         self.clearTerminal()
-        if  not self.resourceMonitor.monitoringStarted:
+        if not self.resourceMonitor.monitoringStarted:
             print(self.NOTINITIALIZED)
+            self.waitAnyKeypress()
         else:
             # Set alarm values before entering
-            self.resourceMonitor.setAlarms()
-            # Loop here and check for changes and reprint, exit on input
-            self.resourceMonitor.monitoringMode()
-            print("Monitoring mode")
-        self.waitAnyKeypress()
+            try:
+                # setAlarms raises exception if no alarms exist
+                self.resourceMonitor.setAlarms()
+                # Loop here and check for changes and reprint, exit on input
+                # Checks every 5 seconds for alarms
+                while True:
+                    self.clearAboveLine()
+                    self.resourceMonitor.checkForAlarms()
+                    print(self.ANYKEYCONTINUE)
+                    if not os.name == "nt":
+                        self.waitAnyKeypress()
+                        break
+                        # It is reachable, needed for wsl/linux
+                    if self.waitForInput(self.alarmIntervalCheck):
+                        break
+            except Exception:
+                print("No alarms created . . .")
+                self.waitAnyKeypress()
         
     def removeAlarm(self):
         self.clearTerminal()
@@ -191,10 +189,30 @@ class Menu:
             return self.validateInputChoice(endRange)
     
     # Print and check for any keypress to proceed
-    @staticmethod
-    def waitAnyKeypress():
-        print("Press any key to continue . . .")
+    def waitAnyKeypress(self):
+        print(self.ANYKEYCONTINUE)
         m.getch()
+        
+    # checks for ANY input and returns true if it happens, clears input-buffer
+    # Also can take a delay parameter which specifies seconds to sleep
+    # Used to break out of loops when repeatedly printing and clearing terminal to update values
+    def waitForInput(self,delay=1) -> bool:
+        # Cleans input so nothing remains in input buffer
+        def flush_input():
+            try:
+                m.getch()
+            except: # Shouldnt happen but if it does this solves
+                import sys, termios    #for linux/unix
+                termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+        # Default is to sleep for 1s
+        for x in range(delay*10):
+                time.sleep(0.1)
+                try: # Windows key detection
+                    if m.kbhit():
+                        flush_input() # Removes stored keystroke from kbhit
+                        return True
+                except: # WSL key detection
+                    pass
         
     # Prints the dict prettily with choices/actions
     def pprintDict(self, dict: dict, count=1):
