@@ -1,5 +1,4 @@
 import psutil
-from datetime import datetime
 from classes.alarmMonitor import AlarmMonitor, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
@@ -89,16 +88,16 @@ class ResourceMonitor:
     # Prints any alarms triggered and time
     def checkForAlarms(self):
         self.updateValues()
-        currentTime = datetime.now()
-        # Check CPU
-        if not self.cpuAlarm == None and self.cpuPercent >= float(self.cpuAlarm.alarmThreshold):
-            print(f"***** CPU-Alarm\tThreshold: {self.cpuAlarm.alarmThreshold}%\tCurrent %: {self.cpuPercent}\tTime: {currentTime} *****")
-        # Check MEM
-        if not self.memAlarm == None and self.memPercent >= float(self.memAlarm.alarmThreshold):
-            print(f"***** MEM-Alarm\tThreshold: {self.memAlarm.alarmThreshold}%\tCurrent %: {self.memPercent}\tTime: {currentTime} *****")
-        # Check DSK
-        if not self.dskAlarm == None and self.dskPercent >= float(self.dskAlarm.alarmThreshold):
-            print(f"***** DSK-Alarm\tThreshold: {self.dskAlarm.alarmThreshold}%\tCurrent %: {self.dskPercent}\tTime: {currentTime} *****")
+        currentPercent : float
+        for alarmType in AlarmType:
+            match alarmType.value:
+                case 1:
+                    currentPercent = self.cpuPercent
+                case 2:
+                    currentPercent = self.memPercent
+                case 3:
+                    currentPercent = self.dskPercent
+            self.alarmMonitor.checkIfAlarmTrigger(currentPercent, alarmType)
        
     # Ran once before entering monitoring mode and checking for alarms to set the alarmvalues
     # Raises exception if no alarms created yet

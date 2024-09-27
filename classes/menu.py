@@ -139,10 +139,9 @@ class Menu:
             print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
         else:
-            # Set alarm values before entering
-            try:
-                # setAlarms raises exception if no alarms exist
-                self.resourceMonitor.setAlarms()
+            # checks if alarms exist
+            if self.alarmMonitor.alarmsExist():
+                print("\t***** MONITORING ON *****")
                 # Loop here and check for changes and reprint, exit on input
                 # Checks every 5 seconds for alarms
                 while True:
@@ -155,7 +154,7 @@ class Menu:
                         # It is reachable, needed for wsl/linux
                     if self.waitForInput(self.alarmIntervalCheck):
                         break
-            except Exception:
+            else:
                 print("No alarms created . . .")
                 self.waitAnyKeypress()
         

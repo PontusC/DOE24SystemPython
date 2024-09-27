@@ -1,4 +1,5 @@
 from enum import Enum
+from datetime import datetime
 import bisect
 
  # Enumtypes for the different alarmtypes
@@ -11,8 +12,6 @@ class AlarmMonitor:
     # Inner hidden class used for serialization and managing type of alarm and thresholds
     # Sortable for easy management
     class Alarm:
-        
-        alarmThreshold = None
         
         def __init__(self, threshold: int, type : AlarmType):
             self.alarmThreshold = threshold
@@ -38,6 +37,7 @@ class AlarmMonitor:
         self.cpuAlarms = []
         self.memAlarms = []
         self.dskAlarms = []
+        self.ALARMARRAYS = [self.cpuAlarms, self.memAlarms, self.dskAlarms]
         
     # Creates alarm of given type and threshold
     def createAlarm(self, type : AlarmType, threshold : int):
@@ -55,8 +55,22 @@ class AlarmMonitor:
         allAlarms = [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms] # Join all alarms into one array
         # Return None if empty alarms
         if len(allAlarms) == 0:
-            return ""
+            return None
         return "".join(str(alarm)+"\n" for alarm in allAlarms).rstrip()
+    
+    # Below function checks if given threshold and alarm type triggers any alarms
+    # Prints any found alarms
+    def checkIfAlarmTrigger(self, thresholdPercent: float, alarmType : AlarmType):
+        alarms = self.ALARMARRAYS[alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
+        # alarms are sorted lower->higher so iterate over list reversed to check highest alarms first
+        for alarm in reversed(alarms):
+            if alarm.alarmThreshold <= thresholdPercent:
+                 print(f"***** {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent %: {thresholdPercent}\tTime: {datetime.now()} *****")
+                 break
+        
+    # Returns true if alarms exist
+    def alarmsExist(self) -> bool:
+        return len([*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]) > 0
     
     # Below functions return the lowest threshold active alarms, return None if doesnt exist
     def getLowestCPUAlarm(self) -> Alarm:
