@@ -45,6 +45,7 @@ class Menu:
     # Constants for reused strings
     NOTINITIALIZED = "Monitoring not intialized . . ."
     ANYKEYCONTINUE = "Press any key to continue . . ."
+    NOALARMS = "No alarms created . . ."
     
     def __init__(self) -> None:
         pass
@@ -95,11 +96,11 @@ class Menu:
                     self.waitAnyKeypress()
                     break
                     # It is reachable, needed for wsl/linux
-                print("Press any key to continue . . .")
+                print(self.ANYKEYCONTINUE)
                 if self.waitForInput(): # Returns true if a button was pressed
                     break
                 self.clearTerminal()
-        except Exception: # Monitor throws exception if monitoring not initialized
+        except Exception: # resourceMonitor throws exception if monitoring not initialized
             print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
         
@@ -125,9 +126,9 @@ class Menu:
     # Prints all active alarms
     def showAlarms(self):
         self.clearTerminal()
-        alarmStr = self.alarmMonitor.returnAlarms()
+        alarmStr = self.alarmMonitor.returnAlarmsString()
         if alarmStr is None:
-            print("No active alarms . . .")
+            print(self.NOALARMS)
         else:
             print(alarmStr)
         self.waitAnyKeypress()
@@ -141,7 +142,7 @@ class Menu:
         else:
             # checks if alarms exist
             if self.alarmMonitor.alarmsExist():
-                print("\t***** MONITORING ON *****")
+                print("\t\t\t***** MONITORING ON *****\n")
                 # Loop here and check for changes and reprint, exit on input
                 # Checks every 5 seconds for alarms
                 while True:
@@ -155,13 +156,23 @@ class Menu:
                     if self.waitForInput(self.alarmIntervalCheck):
                         break
             else:
-                print("No alarms created . . .")
+                print(self.NOALARMS)
                 self.waitAnyKeypress()
         
     def removeAlarm(self):
         self.clearTerminal()
-        print("remove alarms")
-        self.waitAnyKeypress()
+        if self.alarmMonitor.alarmsExist():
+            alarms = self.alarmMonitor.returnAlarms()
+            alarmsDict = {index + 1: alarm for index, alarm in enumerate(alarms)}
+            print("Choices\t\tAlarm to remove")
+            self.pprintDict(alarmsDict)
+            validated_input = self.validateInputChoice(len(alarmsDict))
+            self.alarmMonitor.removeAlarm(alarmsDict[validated_input])
+            print(f"Removed {alarmsDict[validated_input]}")
+            self.waitAnyKeypress()
+        else:
+            print(self.NOALARMS)
+            self.waitAnyKeypress()
         
     # Given dict lists choices and actions
     def listChoices(self, dict: dict):
@@ -169,7 +180,7 @@ class Menu:
         self.pprintDict(dict)
         
     # Verifies and validates input, only allowed to be integers in range
-    # Takes an endRange parameter, add +1 if using dict length.
+    # Takes an endRange parameter
     def validateInputChoice(self, endRange: int):
         try:
             clean_input = int(input("#: ")) # Throws ValueError if not int

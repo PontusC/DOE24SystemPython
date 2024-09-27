@@ -51,12 +51,16 @@ class AlarmMonitor:
                 bisect.insort(self.dskAlarms, newAlarm)
     
     # Returns a formatted str of all current alarms, listed in rising order and by type
-    def returnAlarms(self) -> str:
+    def returnAlarmsString(self) -> str:
         allAlarms = [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms] # Join all alarms into one array
         # Return None if empty alarms
         if len(allAlarms) == 0:
             return None
         return "".join(str(alarm)+"\n" for alarm in allAlarms).rstrip()
+    
+    # Returns a list of ALL alarm objects in ascending order CPU->MEM-DSK
+    def returnAlarms(self) -> []:
+        return [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]
     
     # Below function checks if given threshold and alarm type triggers any alarms
     # Prints any found alarms
@@ -72,22 +76,7 @@ class AlarmMonitor:
     def alarmsExist(self) -> bool:
         return len([*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]) > 0
     
-    # Below functions return the lowest threshold active alarms, return None if doesnt exist
-    def getLowestCPUAlarm(self) -> Alarm:
-        if len(self.cpuAlarms) > 0:
-            return self.cpuAlarms[0]
-        return None
-    
-    def getLowestMEMAlarm(self) -> Alarm:
-        if len(self.memAlarms) > 0:
-            return self.memAlarms[0]
-        return None
-    
-    def getLowestDSKAlarm(self) -> Alarm:
-        if len(self.dskAlarms) > 0:
-            return self.dskAlarms[0]
-        return None
-    
     # Attempts to remove given alarm, true if successful
-    def removeAlarm(self) -> bool:
-        pass
+    def removeAlarm(self, alarm : Alarm):
+        alarms = self.ALARMARRAYS[alarm.alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
+        alarms.remove(alarm)
