@@ -22,6 +22,9 @@ class AlarmHandler:
         def __lt__(self, other) -> bool:
             return self.alarmThreshold <= other.alarmThreshold
         
+        def __eq__(self, other) -> bool:
+            return self.alarmThreshold == other.alarmThreshold and self.alarmType == other.alarmType
+        
         def __str__(self) -> str:
             return f"{self.alarmType.name}-alarm at {self.alarmThreshold}%"
     
