@@ -126,7 +126,7 @@ class Menu:
     # Prints all active alarms
     def showAlarmsMenuChoice(self):
         self.clearTerminal()
-        alarmStr = self.alarmMonitor.returnAlarmsString()
+        alarmStr = self.alarmMonitor.getAlarmsString()
         if alarmStr is None:
             print(self.NOALARMS)
         else:
@@ -163,7 +163,7 @@ class Menu:
     def removeAlarmMenuChoice(self):
         self.clearTerminal()
         if self.alarmMonitor.alarmsExist():
-            alarms = self.alarmMonitor.returnAlarms()
+            alarms = self.alarmMonitor.getAlarms()
             # Generates a dict that follows format for pprintDict()
             removeAlarmChoices = {index + 1: alarm for index, alarm in enumerate(alarms)}
             print("Choices\t\tAlarm to remove")

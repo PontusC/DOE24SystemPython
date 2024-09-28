@@ -1,22 +1,22 @@
 from enum import Enum
 from datetime import datetime
-import bisect
+import bisect, json
 
 # Enums for the different alarmtypes
-class AlarmType(Enum):
+class AlarmType(int, Enum):
         CPU = 1
         MEM = 2
         DSK = 3
 
-# Handdles organizing and checking alarms
+# Handles organizing and checking alarms
 class AlarmHandler:
     # Inner hidden class used for serialization and managing type of alarm and thresholds
     # Sortable for easy management
     class Alarm:
         
         def __init__(self, threshold: int, type : AlarmType):
-            self.alarmThreshold = threshold
-            self.alarmType = type
+            self.alarmThreshold : int = threshold
+            self.alarmType : AlarmType = type
         
         # Returns true if self object has lower threshold of alarm
         def __lt__(self, other) -> bool:
@@ -56,7 +56,7 @@ class AlarmHandler:
                 bisect.insort(self.dskAlarms, newAlarm)
     
     # Returns a formatted str of all current alarms, listed in ascending order and grouped by type
-    def returnAlarmsString(self) -> str:
+    def getAlarmsString(self) -> str:
         allAlarms = [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms] # Join all alarms into one array
         # Return None if empty alarms
         if len(allAlarms) == 0:
@@ -64,7 +64,7 @@ class AlarmHandler:
         return "".join(str(alarm)+"\n" for alarm in allAlarms).rstrip()
     
     # Returns a list of all alarm objects in ascending order grouped by type
-    def returnAlarms(self):
+    def getAlarms(self):
         return [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]
     
     # Checks if given threshold and alarm type triggers any alarms
@@ -84,3 +84,6 @@ class AlarmHandler:
     def removeAlarm(self, alarm : Alarm):
         alarms = self.ALARMARRAYS[alarm.alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
         alarms.remove(alarm)
+        
+    def alarmsToJSON(self) -> str:
+        return "".join(json.dumps(alarm.__dict__)+"\n" for alarm in [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms])
