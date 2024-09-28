@@ -1,5 +1,5 @@
 import psutil
-from classes.alarmMonitor import AlarmMonitor, AlarmType
+from classes.alarmHandler import AlarmHandler, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
@@ -7,6 +7,7 @@ except ImportError:
     import getch as m # type: ignore
 from psutil._common import bytes2human
 
+# Handles retreiving resource usage and organizing
 class ResourceMonitor:
     
     # Singleton pattern
@@ -18,7 +19,7 @@ class ResourceMonitor:
     
     # Class variables
     monitoringStarted = False
-    alarmMonitor = AlarmMonitor()
+    alarmMonitor = AlarmHandler()
     cpuAlarm = None
     memAlarm = None
     dskAlarm = None

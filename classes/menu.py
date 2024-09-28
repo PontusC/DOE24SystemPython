@@ -1,6 +1,6 @@
 import os, time
 from classes.resourceMonitor import ResourceMonitor
-from classes.alarmMonitor import AlarmMonitor, AlarmType
+from classes.alarmHandler import AlarmHandler, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
     import msvcrt as m
@@ -18,8 +18,9 @@ class Menu:
         return menu._self_
     
     # Class variables/constants
+    
     # Both below dicts should just be rewritten to be a list/array
-    # All different menu commands excluding default menu
+    # All menu commands 
     MENUCHOICES = dict([(1, "Initiate monitoring"),
                         (2, "Show monitoring values"),
                         (3, "Create alarm"),
@@ -27,7 +28,7 @@ class Menu:
                         (5, "Show alarms"),
                         (6, "Initiate monitoring mode"),
                         (7, "Exit")])
-    # All different commands for alarm menues
+    # All commands for alarm creation menu
     ALARMCHOICES = dict([(1, "CPU"),
                          (2, "MEM"),
                          (3, "DSK"),
@@ -36,11 +37,11 @@ class Menu:
     alarmIntervalCheck = 5
     
     # Used to remember if its the first time user has entered wrong input in validateInputChoice
-    firstError = True
+    firstUserInputError = True
     
-    # Reference to ResourceMonitor and AlarmMonitor
+    # References to ResourceMonitor and AlarmMonitor
     resourceMonitor = ResourceMonitor()
-    alarmMonitor = AlarmMonitor()
+    alarmMonitor = AlarmHandler()
     
     # Constants for reused strings
     NOTINITIALIZED = "Monitoring not intialized . . ."
@@ -59,25 +60,24 @@ class Menu:
                 clean_input = self.validateInputChoice(len(self.MENUCHOICES))
                 match clean_input:
                     case 1:     # Initiate monitoring
-                        self.initMonitoring()
+                        self.initMonitoringMenuChoice()
                     case 2:     # Show monitoring values
-                        self.showMonitoringValues()
+                        self.showMonitoringMenuChoice()
                     case 3:     # Create alarm 
-                        self.createAlarm()
+                        self.createAlarmMenuChoice()
                     case 4:     # Remove alarm
-                        self.removeAlarm()
+                        self.removeAlarmMenuChoice()
                     case 5:     # Show alarms
-                        self.showAlarms()
-                    case 6:     # Initiate monitoring mode
-                        self.initMonitoringMode()
+                        self.showAlarmsMenuChoice()
+                    case 6:     # Initiate alarm monitoring mode
+                        self.initAlarmMonitoringMenuChoice()
                     case 7:     # Exit
                         break
         except KeyboardInterrupt: # Control+C to exit
             pass
         
-        
-    # Starts monitoring
-    def initMonitoring(self):
+    # Enables monitoring in the ResourceMonitor
+    def initMonitoringMenuChoice(self):
         self.clearTerminal()
         try:
             self.resourceMonitor.initMonitoring()
@@ -86,35 +86,35 @@ class Menu:
             print("Monitoring already initialized . . .")
         self.waitAnyKeypress()
         
-    # Contiually shows current resource usage (on windows)
-    def showMonitoringValues(self):
+    # Continually prints and reprints current resource usage (on windows)
+    def showMonitoringMenuChoice(self):
         self.clearTerminal()
         try:
             while True:
                 print(self.resourceMonitor.returnMonitorValues())
-                if not os.name == "nt":
+                if not os.name == "nt": 
+                    # It is reachable, needed for wsl/linux
                     self.waitAnyKeypress()
                     break
-                    # It is reachable, needed for wsl/linux
                 print(self.ANYKEYCONTINUE)
-                if self.waitForInput(): # Returns true if a button was pressed
+                if self.waitForInput(): # Returns true if a button was pressed, also pauses program
                     break
                 self.clearTerminal()
         except Exception: # resourceMonitor throws exception if monitoring not initialized
             print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
         
-    # Takes input and generates alarm of specified type
-    def createAlarm(self):
+    # Takes input and generates alarm of specified type and threshold
+    def createAlarmMenuChoice(self):
         self.clearTerminal()
         self.listChoices(self.ALARMCHOICES)
-        # Takes input and generates the correct ENUM associated with that AlarmType
         validatedInput = self.validateInputChoice(len(self.ALARMCHOICES))
         if validatedInput < 4: # Only 1-3 valid to generate alarms, 4 back to main menu
+            # Takes input and generates corresponding AlarmType Enum
             alarmType = AlarmType(validatedInput)
             # Takes user input in range 1-100 and creates and stores that alarm
             self.clearTerminal()
-            print(f"Enter an alarm value for {alarmType.name} between 1-100%")
+            print(f"Enter an alarm threshold for {alarmType.name} between 1-100%")
             alarmThreshold = self.validateInputChoice(100)
             self.clearTerminal()
             self.alarmMonitor.createAlarm(alarmType, alarmThreshold)
@@ -124,7 +124,7 @@ class Menu:
             self.clearTerminal()
     
     # Prints all active alarms
-    def showAlarms(self):
+    def showAlarmsMenuChoice(self):
         self.clearTerminal()
         alarmStr = self.alarmMonitor.returnAlarmsString()
         if alarmStr is None:
@@ -133,8 +133,8 @@ class Menu:
             print(alarmStr)
         self.waitAnyKeypress()
     
-    # Continually (on windows) prints that it is monitoring and whenever an alarm occurs
-    def initMonitoringMode(self):
+    # Continually (on windows) prints whenever an alarm occurs
+    def initAlarmMonitoringMenuChoice(self):
         self.clearTerminal()
         if not self.resourceMonitor.monitoringStarted:
             print(self.NOTINITIALIZED)
@@ -146,7 +146,7 @@ class Menu:
                 # Loop here and check for changes and reprint, exit on input
                 # Checks every 5 seconds for alarms
                 while True:
-                    self.clearAboveLine()
+                    self.clearAboveLineTerminal()
                     self.resourceMonitor.checkForAlarms()
                     print(self.ANYKEYCONTINUE)
                     if not os.name == "nt":
@@ -159,16 +159,18 @@ class Menu:
                 print(self.NOALARMS)
                 self.waitAnyKeypress()
         
-    def removeAlarm(self):
+    # Removevs a specified alarm
+    def removeAlarmMenuChoice(self):
         self.clearTerminal()
         if self.alarmMonitor.alarmsExist():
             alarms = self.alarmMonitor.returnAlarms()
-            alarmsDict = {index + 1: alarm for index, alarm in enumerate(alarms)}
+            # Generates a dict that follows format for pprintDict()
+            removeAlarmChoices = {index + 1: alarm for index, alarm in enumerate(alarms)}
             print("Choices\t\tAlarm to remove")
-            self.pprintDict(alarmsDict)
-            validated_input = self.validateInputChoice(len(alarmsDict))
-            self.alarmMonitor.removeAlarm(alarmsDict[validated_input])
-            print(f"Removed {alarmsDict[validated_input]}")
+            self.pprintDict(removeAlarmChoices)
+            validated_input = self.validateInputChoice(len(removeAlarmChoices))
+            self.alarmMonitor.removeAlarm(removeAlarmChoices[validated_input])
+            print(f"Removed {removeAlarmChoices[validated_input]}")
             self.waitAnyKeypress()
         else:
             print(self.NOALARMS)
@@ -179,22 +181,21 @@ class Menu:
         print("Choices\t\tActions")
         self.pprintDict(dict)
         
-    # Verifies and validates input, only allowed to be integers in range
-    # Takes an endRange parameter
+    # Verifies and validates input, only allowed to be integers in given range
     def validateInputChoice(self, endRange: int):
         try:
             clean_input = int(input("#: ")) # Throws ValueError if not int
             if not (0 < clean_input < endRange + 1):
                 raise ValueError
-            self.firstError = True # Reset firstError to default state
+            self.firstUserInputError = True # Reset firstError to default state
             return clean_input
         except ValueError:
-            self.clearAboveLine()
+            self.clearAboveLineTerminal()
             # If its not the first error input, has to clear two lines in terminal to keep it tidy
-            if not self.firstError:
-                self.clearAboveLine()
+            if not self.firstUserInputError:
+                self.clearAboveLineTerminal()
             else:
-                self.firstError = False
+                self.firstUserInputError = False
             print("Invalid input, try again")
             return self.validateInputChoice(endRange)
     
@@ -206,7 +207,7 @@ class Menu:
     # checks for ANY input and returns true if it happens, clears input-buffer
     # Also can take a delay parameter which specifies seconds to sleep
     # Used to break out of loops when repeatedly printing and clearing terminal to update values
-    def waitForInput(self,delay=1) -> bool:
+    def waitForInput(self, delay=1) -> bool:
         # Cleans input so nothing remains in input buffer
         def flush_input():
             try:
@@ -224,7 +225,7 @@ class Menu:
                 except: # WSL key detection
                     pass
         
-    # Prints the dict prettily with choices/actions
+    # Prints given dict prettily with choices/actions
     def pprintDict(self, dict: dict, count=1):
         if count > len(dict):
             return
@@ -234,7 +235,7 @@ class Menu:
         
     # Run to clear one line above in terminal
     @staticmethod
-    def clearAboveLine():
+    def clearAboveLineTerminal():
         LINE_UP = '\033[1A'     # ANSI-code that moves cursor up one line
         LINE_CLEAR = '\x1b[2K'  # ANSI-code that erases current line
         print(LINE_UP, end=LINE_CLEAR)

@@ -1,12 +1,15 @@
-import psutil, time, os
 from classes.menu import Menu
-from classes.resourceMonitor import ResourceMonitor
+
+TESTING = False
 
 if __name__ == '__main__':
     print("Starting...")
-    # Instantiating singletons
-    menu = Menu()
-    menu.clearTerminal()
-    # Starting menu
-    menu.runMenu()
-    print("Terminating . . .")
+    if not TESTING:
+        # Instantiating singletons
+        menu = Menu()
+        menu.clearTerminal()
+        # Starting menu
+        menu.runMenu()
+        print("Terminating . . .")
+    else:
+        pass

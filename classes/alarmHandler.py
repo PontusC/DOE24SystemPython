@@ -2,13 +2,14 @@ from enum import Enum
 from datetime import datetime
 import bisect
 
- # Enumtypes for the different alarmtypes
+# Enums for the different alarmtypes
 class AlarmType(Enum):
         CPU = 1
         MEM = 2
         DSK = 3
 
-class AlarmMonitor:
+# Handdles organizing and checking alarms
+class AlarmHandler:
     # Inner hidden class used for serialization and managing type of alarm and thresholds
     # Sortable for easy management
     class Alarm:
@@ -44,13 +45,14 @@ class AlarmMonitor:
         newAlarm = self.Alarm(threshold, type)
         match type.value:
             case 1: # Matches ENUM to it's value, CPU = 1 etc...
+                # Sorted insert
                 bisect.insort(self.cpuAlarms, newAlarm)
             case 2:
                 bisect.insort(self.memAlarms, newAlarm)
             case 3:
                 bisect.insort(self.dskAlarms, newAlarm)
     
-    # Returns a formatted str of all current alarms, listed in rising order and by type
+    # Returns a formatted str of all current alarms, listed in ascending order and grouped by type
     def returnAlarmsString(self) -> str:
         allAlarms = [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms] # Join all alarms into one array
         # Return None if empty alarms
@@ -58,18 +60,17 @@ class AlarmMonitor:
             return None
         return "".join(str(alarm)+"\n" for alarm in allAlarms).rstrip()
     
-    # Returns a list of ALL alarm objects in ascending order CPU->MEM-DSK
-    def returnAlarms(self) -> []:
+    # Returns a list of all alarm objects in ascending order grouped by type
+    def returnAlarms(self):
         return [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]
     
-    # Below function checks if given threshold and alarm type triggers any alarms
-    # Prints any found alarms
+    # Checks if given threshold and alarm type triggers any alarms
     def checkIfAlarmTrigger(self, thresholdPercent: float, alarmType : AlarmType):
         alarms = self.ALARMARRAYS[alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
         # alarms are sorted lower->higher so iterate over list reversed to check highest alarms first
         for alarm in reversed(alarms):
             if alarm.alarmThreshold <= thresholdPercent:
-                 print(f"***** {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent %: {thresholdPercent}\tTime: {datetime.now()} *****")
+                 print(f"***** {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent: {thresholdPercent}%\tTime: {datetime.now()} *****")
                  break
         
     # Returns true if alarms exist
