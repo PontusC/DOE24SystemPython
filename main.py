@@ -1,6 +1,5 @@
 from classes.menu import Menu
 from classes.menu import AlarmHandler, AlarmType
-import json
 
 TESTING = False
 
@@ -14,5 +13,4 @@ if __name__ == '__main__':
         menu.runMenu()
         print("Terminating . . .")
     else:
-        alarmHandler = AlarmHandler()
-        print(alarmHandler.getAlarmsString())
+        pass
