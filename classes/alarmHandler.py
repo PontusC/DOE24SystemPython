@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime
-import bisect, json
+import bisect, json, logging, time
 
 # Enums for the different alarmtypes
 class AlarmType(int, Enum):
@@ -33,8 +33,6 @@ class AlarmHandler:
     def __new__(alarm):
         if alarm._self_ is None:
             alarm._self_ = super().__new__(alarm)
-            # Load alarms ONCE
-            alarm._self_.loadAlarmsFromFile()
         return alarm._self_
     
     # Class variables
@@ -47,12 +45,16 @@ class AlarmHandler:
     dskAlarms = []
     ALARMARRAYS = [cpuAlarms, memAlarms, dskAlarms]
     
+    # Reference to logger
+    log = logging.getLogger("AlarmHandler")
+    
     def __init__(self) -> None:
         pass
         
     # Creates alarm of given type and threshold
     def createAlarm(self, type : AlarmType, threshold : int):
         newAlarm = self.Alarm(threshold, type)
+        self.log.info(f"{newAlarm.alarmType.name}-Alarm at {newAlarm.alarmThreshold}% created")
         match type.value:
             case 1: # Matches ENUM to it's value, CPU = 1 etc...
                 # Sorted insert
@@ -80,7 +82,8 @@ class AlarmHandler:
         # alarms are sorted lower->higher so iterate over list reversed to check highest alarms first
         for alarm in reversed(alarms):
             if alarm.alarmThreshold <= thresholdPercent:
-                 print(f"***** {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent: {thresholdPercent}%\tTime: {datetime.now()} *****")
+                 print(f"***** {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent: {thresholdPercent}%\tTime: {datetime.now().strftime(format="%H:%M:%S:%f03d")[:12]} *****")
+                 self.log.info(f"Alarm: {alarmType.name}-Alarm\tThreshold: {alarm.alarmThreshold}%\tCurrent: {thresholdPercent}%")
                  break
         
     # Returns true if alarms exist
@@ -91,6 +94,7 @@ class AlarmHandler:
     def removeAlarm(self, alarm : Alarm):
         alarms = self.ALARMARRAYS[alarm.alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
         alarms.remove(alarm)
+        self.log.info(f"Removed {alarm}")
     
     # Converts all alarms to JSON and returns the string format [{"alarmThreshold": 3, "alarmType": 1}, ... ]
     def alarmsToJSON(self) -> str:
@@ -110,6 +114,7 @@ class AlarmHandler:
         file = open(self.STOREDALARMS, "w")
         file.write(self.alarmsToJSON())
         file.close()
+        self.log.info(f"Alarms successfully saved to {self.STOREDALARMS}")
         
     # Loads and generates alarms from stored file if it exists
     def loadAlarmsFromFile(self):
@@ -117,6 +122,9 @@ class AlarmHandler:
             file = open(self.STOREDALARMS, "r")
             jsonAlarms = file.read()
             file.close()
+            self.log.info(f"Loading alarms from {self.STOREDALARMS}")
             self.JSONToAlarms(jsonAlarms)
+            self.log.info(f"Alarms successfully loaded from {self.STOREDALARMS}")
         except:
-            print("No alarms to load . . .")
+            self.log.info("No alarms found")
+            pass
