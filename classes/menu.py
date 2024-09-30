@@ -1,4 +1,4 @@
-import os, time
+import os, time, logging, time
 from classes.resourceMonitor import ResourceMonitor
 from classes.alarmHandler import AlarmHandler, AlarmType
 # Import msvcrt on windows, getch on linux
@@ -43,8 +43,13 @@ class Menu:
     resourceMonitor = ResourceMonitor()
     alarmHandler = AlarmHandler()
     
+    # Reference to logger
+    log = logging.getLogger("Menu")
+    
     # Constants for reused strings
     NOTINITIALIZED = "Monitoring not intialized . . ."
+    INITIALIZED = "Monitoring initialized . . ."
+    ALREADYINITIALIZED = "Monitoring already initialized . . ."
     ANYKEYCONTINUE = "Press any key to continue . . ."
     NOALARMS = "No alarms created . . ."
     
@@ -82,17 +87,22 @@ class Menu:
         self.clearTerminal()
         try:
             self.resourceMonitor.initMonitoring()
-            print("Monitoring initialized . . .")
+            print(self.INITIALIZED)
         except Exception:
-            print("Monitoring already initialized . . .")
+            print(self.ALREADYINITIALIZED)
         self.waitAnyKeypress()
         
     # Continually prints and reprints current resource usage (on windows)
     def showMonitoringMenuChoice(self):
+        printedLogFile = False
         self.clearTerminal()
         try:
             while True:
                 print(self.resourceMonitor.returnMonitorValues())
+                # Used to only log once, needed because of my try/except structure
+                if not printedLogFile:
+                    self.log.info("Resource monitoring: started")
+                    printedLogFile = True
                 if not os.name == "nt": 
                     # It is reachable, needed for wsl/linux
                     self.waitAnyKeypress()
@@ -100,6 +110,7 @@ class Menu:
                 print(self.ANYKEYCONTINUE)
                 if self.waitForInput(): # Returns true if a button was pressed, also pauses program
                     break
+                self.log.info("Resource monitoring: exited")
                 self.clearTerminal()
         except Exception: # resourceMonitor throws exception if monitoring not initialized
             print(self.NOTINITIALIZED)
@@ -144,6 +155,7 @@ class Menu:
             # checks if alarms exist
             if self.alarmHandler.alarmsExist():
                 print("\t\t\t***** MONITORING ON *****\n")
+                self.log.info("Alarm monitoring: started")
                 # Loop here and check for changes and reprint, exit on input
                 # Checks every 5 seconds for alarms
                 while True:
@@ -156,6 +168,7 @@ class Menu:
                         # It is reachable, needed for wsl/linux
                     if self.waitForInput(self.alarmIntervalCheck):
                         break
+                self.log.info("Alarm monitoring: exited")
             else:
                 print(self.NOALARMS)
                 self.waitAnyKeypress()
