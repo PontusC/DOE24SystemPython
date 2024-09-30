@@ -1,4 +1,5 @@
 from classes.menu import Menu
+from classes.menu import AlarmHandler, AlarmType
 
 TESTING = False
 

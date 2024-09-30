@@ -9,6 +9,10 @@ __pycache__/
 # VSCode
 .vscode
 
+# Own files
+storedAlarms.json
+logfile.json
+
 # Distribution / packaging
 .Python
 build/
