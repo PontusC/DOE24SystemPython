@@ -19,11 +19,10 @@ if __name__ == '__main__':
             alarmHandler.createAlarm(AlarmType(1), i*3)
         firstAlarm : AlarmHandler.Alarm =  alarmHandler.getAlarms()[0]
         firstAlarmJSON = json.dumps(firstAlarm.__dict__)
-        print(firstAlarmJSON)
+        #print(firstAlarmJSON)
         loadedAlarm = json.loads(firstAlarmJSON)
-        print(loadedAlarm)
+        #print(loadedAlarm)
         allAlarmsJSON = alarmHandler.alarmsToJSON()
         print(allAlarmsJSON)
-        for alarm in allAlarmsJSON.splitlines():
-            print(alarm)
-            print(json.loads(alarm)) # dict object
+        alarmHandler.JSONToAlarms(allAlarmsJSON)
+        print(alarmHandler.getAlarmsString())

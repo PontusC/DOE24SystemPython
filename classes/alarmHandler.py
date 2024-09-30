@@ -84,6 +84,18 @@ class AlarmHandler:
     def removeAlarm(self, alarm : Alarm):
         alarms = self.ALARMARRAYS[alarm.alarmType.value - 1] # Gets correct array of alarms, based on AlarmType Enum
         alarms.remove(alarm)
-        
+    
+    # Converts all alarms to JSON and returns the string format [{"alarmThreshold": 3, "alarmType": 1}, ... ]
     def alarmsToJSON(self) -> str:
-        return "".join(json.dumps(alarm.__dict__)+"\n" for alarm in [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms])
+        return json.dumps([alarm.__dict__  for alarm in [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]])
+        #return "".join(json.dumps(alarm.__dict__)+"\n" for alarm in [*self.cpuAlarms, *self.memAlarms, *self.dskAlarms]).rstrip()
+          
+    # Takes str from file input and generates an alarm per each stored alarm
+    def JSONToAlarms(self, loadedAlarms : str):
+        arrayOfStoredAlarms = json.loads(loadedAlarms)
+        for storedAlarm in arrayOfStoredAlarms:
+            # AlarmType and Threshold keys, Value is threshold 
+            alarmType = AlarmType(storedAlarm["alarmType"])
+            alarmThreshold = storedAlarm["alarmThreshold"]
+            print(alarmType, alarmThreshold)
+            self.createAlarm(alarmType, alarmThreshold)
