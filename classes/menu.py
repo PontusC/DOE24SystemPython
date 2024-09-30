@@ -41,7 +41,7 @@ class Menu:
     
     # References to ResourceMonitor and AlarmMonitor
     resourceMonitor = ResourceMonitor()
-    alarmMonitor = AlarmHandler()
+    alarmHandler = AlarmHandler()
     
     # Constants for reused strings
     NOTINITIALIZED = "Monitoring not intialized . . ."
@@ -72,6 +72,7 @@ class Menu:
                     case 6:     # Initiate alarm monitoring mode
                         self.initAlarmMonitoringMenuChoice()
                     case 7:     # Exit
+                        self.alarmHandler.saveAlarmsToFile()
                         break
         except KeyboardInterrupt: # Control+C to exit
             pass
@@ -117,7 +118,7 @@ class Menu:
             print(f"Enter an alarm threshold for {alarmType.name} between 1-100%")
             alarmThreshold = self.validateInputChoice(100)
             self.clearTerminal()
-            self.alarmMonitor.createAlarm(alarmType, alarmThreshold)
+            self.alarmHandler.createAlarm(alarmType, alarmThreshold)
             print(f"Alarm created for {alarmType.name} at {alarmThreshold}% usage")
             self.waitAnyKeypress()
         else:
@@ -126,7 +127,7 @@ class Menu:
     # Prints all active alarms
     def showAlarmsMenuChoice(self):
         self.clearTerminal()
-        alarmStr = self.alarmMonitor.getAlarmsString()
+        alarmStr = self.alarmHandler.getAlarmsString()
         if alarmStr is None:
             print(self.NOALARMS)
         else:
@@ -141,7 +142,7 @@ class Menu:
             self.waitAnyKeypress()
         else:
             # checks if alarms exist
-            if self.alarmMonitor.alarmsExist():
+            if self.alarmHandler.alarmsExist():
                 print("\t\t\t***** MONITORING ON *****\n")
                 # Loop here and check for changes and reprint, exit on input
                 # Checks every 5 seconds for alarms
@@ -162,14 +163,14 @@ class Menu:
     # Removevs a specified alarm
     def removeAlarmMenuChoice(self):
         self.clearTerminal()
-        if self.alarmMonitor.alarmsExist():
-            alarms = self.alarmMonitor.getAlarms()
+        if self.alarmHandler.alarmsExist():
+            alarms = self.alarmHandler.getAlarms()
             # Generates a dict that follows format for pprintDict()
             removeAlarmChoices = {index + 1: alarm for index, alarm in enumerate(alarms)}
             print("Choices\t\tAlarm to remove")
             self.pprintDict(removeAlarmChoices)
             validated_input = self.validateInputChoice(len(removeAlarmChoices))
-            self.alarmMonitor.removeAlarm(removeAlarmChoices[validated_input])
+            self.alarmHandler.removeAlarm(removeAlarmChoices[validated_input])
             print(f"Removed {removeAlarmChoices[validated_input]}")
             self.waitAnyKeypress()
         else:

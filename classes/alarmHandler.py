@@ -33,15 +33,22 @@ class AlarmHandler:
     def __new__(alarm):
         if alarm._self_ is None:
             alarm._self_ = super().__new__(alarm)
+            # Load alarms ONCE
+            alarm._self_.loadAlarmsFromFile()
         return alarm._self_
     
     # Class variables
+    # Constant for file name
+    STOREDALARMS = "storedAlarms.json"
+    
+    # Arrays for containing alarms
+    cpuAlarms = []
+    memAlarms = []
+    dskAlarms = []
+    ALARMARRAYS = [cpuAlarms, memAlarms, dskAlarms]
     
     def __init__(self) -> None:
-        self.cpuAlarms = []
-        self.memAlarms = []
-        self.dskAlarms = []
-        self.ALARMARRAYS = [self.cpuAlarms, self.memAlarms, self.dskAlarms]
+        pass
         
     # Creates alarm of given type and threshold
     def createAlarm(self, type : AlarmType, threshold : int):
@@ -97,5 +104,19 @@ class AlarmHandler:
             # AlarmType and Threshold keys, Value is threshold 
             alarmType = AlarmType(storedAlarm["alarmType"])
             alarmThreshold = storedAlarm["alarmThreshold"]
-            print(alarmType, alarmThreshold)
             self.createAlarm(alarmType, alarmThreshold)
+           
+    def saveAlarmsToFile(self):
+        file = open(self.STOREDALARMS, "w")
+        file.write(self.alarmsToJSON())
+        file.close()
+        
+    # Loads and generates alarms from stored file if it exists
+    def loadAlarmsFromFile(self):
+        try:
+            file = open(self.STOREDALARMS, "r")
+            jsonAlarms = file.read()
+            file.close()
+            self.JSONToAlarms(jsonAlarms)
+        except:
+            print("No alarms to load . . .")
