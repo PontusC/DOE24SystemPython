@@ -1,7 +1,7 @@
 import logging.config
 from classes.menu import Menu
 from classes.menu import AlarmHandler, AlarmType
-import logging, time
+import logging
 
 if __name__ == '__main__':
     # Logging setup

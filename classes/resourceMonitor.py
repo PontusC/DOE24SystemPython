@@ -1,4 +1,4 @@
-import psutil, logging, time
+import psutil, logging
 from classes.alarmHandler import AlarmHandler, AlarmType
 # Import msvcrt on windows, getch on linux
 try:
@@ -41,7 +41,7 @@ class ResourceMonitor:
     DSKPATHWSL = "/mnt/c/" # WSL
     
     # Reference to logger
-    log = logging.getLogger("AlarmHandler")
+    log = logging.getLogger("ResourceMonitor")
     
     def __init__(self) -> None:
         pass

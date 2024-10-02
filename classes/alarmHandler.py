@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import datetime
-import bisect, json, logging, time
+import bisect, json, logging
 
 # Enums for the different alarmtypes
 class AlarmType(int, Enum):

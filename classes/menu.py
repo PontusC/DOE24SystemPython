@@ -110,8 +110,9 @@ class Menu:
                 print(self.ANYKEYCONTINUE)
                 if self.waitForInput(): # Returns true if a button was pressed, also pauses program
                     break
-                self.log.info("Resource monitoring: exited")
+                
                 self.clearTerminal()
+            self.log.info("Resource monitoring: exited")
         except Exception: # resourceMonitor throws exception if monitoring not initialized
             print(self.NOTINITIALIZED)
             self.waitAnyKeypress()
