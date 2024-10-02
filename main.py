@@ -1,6 +1,6 @@
 import logging.config
 from classes.menu import Menu
-from classes.menu import AlarmHandler, AlarmType
+from classes.menu import AlarmHandler
 import logging
 
 if __name__ == '__main__':
