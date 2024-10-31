@@ -20,9 +20,6 @@ class ResourceMonitor:
     # Class variables
     monitoringStarted = False
     alarmMonitor = AlarmHandler()
-    cpuAlarm = None
-    memAlarm = None
-    dskAlarm = None
     
     # CPU stats
     cpuPercent : float = None

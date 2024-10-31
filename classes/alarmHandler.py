@@ -55,14 +55,8 @@ class AlarmHandler:
     def createAlarm(self, type : AlarmType, threshold : int):
         newAlarm = self.Alarm(threshold, type)
         self.log.info(f"{newAlarm.alarmType.name}-Alarm at {newAlarm.alarmThreshold}% created")
-        match type.value:
-            case 1: # Matches ENUM to it's value, CPU = 1 etc...
-                # Sorted insert
-                bisect.insort(self.cpuAlarms, newAlarm)
-            case 2:
-                bisect.insort(self.memAlarms, newAlarm)
-            case 3:
-                bisect.insort(self.dskAlarms, newAlarm)
+        # Sorted insert based on alarm type value, CPU array is index 0 etc...
+        bisect.insort(self.ALARMARRAYS[type.value - 1], newAlarm)
     
     # Returns a formatted str of all current alarms, listed in ascending order and grouped by type
     def getAlarmsString(self) -> str:
@@ -125,6 +119,12 @@ class AlarmHandler:
             self.log.info(f"Loading alarms from {self.STOREDALARMS}")
             self.JSONToAlarms(jsonAlarms)
             self.log.info(f"Alarms successfully loaded from {self.STOREDALARMS}")
+            # Verify alarms are sorted in ascending order
+            for alarmArray in self.ALARMARRAYS:
+                sortedArray = sorted(alarmArray, key=lambda alarm: alarm.alarmThreshold)
+                # Will actually never occur since whenever alarms are created they are loaded and re-sorted
+                if not sortedArray == alarmArray:
+                    self.log.info(f"Stored {alarmArray[0].alarmType}-alarms loaded out of order!")
         except:
             self.log.info("No alarms found")
             pass

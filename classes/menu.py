@@ -36,9 +36,6 @@ class Menu:
     # Defines how often to check for alarms in seconds
     alarmIntervalCheck = 5
     
-    # Used to remember if its the first time user has entered wrong input in validateInputChoice
-    firstUserInputError = True
-    
     # References to ResourceMonitor and AlarmMonitor
     resourceMonitor = ResourceMonitor()
     alarmHandler = AlarmHandler()
@@ -94,15 +91,16 @@ class Menu:
         
     # Continually prints and reprints current resource usage (on windows)
     def showMonitoringMenuChoice(self):
-        printedLogFile = False
+        # Used to only print to log once
+        hasPrintedToLog = False
         self.clearTerminal()
         try:
             while True:
                 print(self.resourceMonitor.returnMonitorValues())
                 # Used to only log once, needed because of my try/except structure
-                if not printedLogFile:
+                if not hasPrintedToLog:
                     self.log.info("Resource monitoring: started")
-                    printedLogFile = True
+                    hasPrintedToLog = True
                 if not os.name == "nt": 
                     # It is reachable, needed for wsl/linux
                     self.waitAnyKeypress()
@@ -196,6 +194,9 @@ class Menu:
         print("Choices\t\tActions")
         self.pprintDict(dict)
         
+    # Used to remember if its the first time user has entered wrong input in validateInputChoice
+    firstUserInputError = True    
+    
     # Verifies and validates input, only allowed to be integers in given range
     def validateInputChoice(self, endRange: int):
         try:
